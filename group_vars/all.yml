@@ -8,13 +8,6 @@ pip_install_packages:
 docker_users:
   - "{{ ansible_user }}"
 
-# The Ubuntu docker.io unit uses socket activation. During migration to
-# Docker CE the old docker.socket can be stopped before the new service starts,
-# so bind the daemon to its Unix socket directly.
-docker_service_start_command: >-
-  /usr/bin/dockerd -H unix:///var/run/docker.sock
-  --containerd=/run/containerd/containerd.sock
-
 redmine_image: redmine:7.0.1
 redmine_port: 80
 
