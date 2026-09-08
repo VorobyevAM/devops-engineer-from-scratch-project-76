@@ -4,6 +4,13 @@
   become: true
 
   pre_tasks:
+    - name: Update apt package cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      tags:
+        - prepare
+
     - name: Validate Datadog API key
       ansible.builtin.assert:
         that:
