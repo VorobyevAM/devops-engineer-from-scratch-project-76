@@ -1,0 +1,8 @@
+production:
+  adapter: postgresql
+  host: '<%= ENV.fetch("REDMINE_DB_POSTGRES").gsub("'", "''") %>'
+  port: <%= ENV.fetch("REDMINE_DB_PORT", "5432") %>
+  database: '<%= ENV.fetch("REDMINE_DB_DATABASE").gsub("'", "''") %>'
+  username: '<%= ENV.fetch("REDMINE_DB_USERNAME").gsub("'", "''") %>'
+  password: '<%= ENV.fetch("REDMINE_DB_PASSWORD").gsub("'", "''") %>'
+  encoding: utf8

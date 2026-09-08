@@ -1,0 +1,95 @@
+---
+- name: Manage Redmine web servers
+  hosts: all
+  become: true
+
+  pre_tasks:
+    - name: Validate Datadog API key
+      ansible.builtin.assert:
+        that:
+          - datadog_api_key | length > 0
+        fail_msg: >-
+          Define vault_datadog_api_key in the encrypted
+          group_vars/webservers/vault.yml file.
+      when: "'webservers' in group_names"
+      no_log: true
+      tags:
+        - monitoring
+
+  roles:
+    - role: geerlingguy.pip
+      tags:
+        - prepare
+    - role: geerlingguy.docker
+      tags:
+        - prepare
+    - role: datadog.dd.agent
+      when: "'webservers' in group_names"
+      tags:
+        - monitoring
+
+  tasks:
+    - name: Validate deployment secrets
+      ansible.builtin.assert:
+        that:
+          - redmine_db_password | length > 0
+          - redmine_secret_key_base | length > 0
+        fail_msg: >-
+          Define vault_redmine_db_password and vault_redmine_secret_key_base
+          in the encrypted group_vars/webservers/vault.yml file.
+      no_log: true
+      tags:
+        - deploy
+
+    - name: Create Redmine configuration directory
+      ansible.builtin.file:
+        path: /opt/redmine
+        state: directory
+        owner: root
+        group: root
+        mode: "0750"
+      tags:
+        - deploy
+
+    - name: Create Redmine environment file
+      ansible.builtin.template:
+        src: templates/redmine.env.j2
+        dest: /opt/redmine/.env
+        owner: root
+        group: root
+        mode: "0600"
+      no_log: true
+      tags:
+        - deploy
+
+    - name: Create Redmine database configuration
+      ansible.builtin.template:
+        src: templates/database.yml.j2
+        dest: /opt/redmine/database.yml
+        owner: "999"
+        group: "999"
+        mode: "0644"
+      tags:
+        - deploy
+
+    - name: Remove temporary smoke-check container
+      community.docker.docker_container:
+        name: hexlet6-smoke
+        state: absent
+      tags:
+        - deploy
+
+    - name: Run Redmine
+      community.docker.docker_container:
+        name: redmine
+        image: "{{ redmine_image }}"
+        state: started
+        restart_policy: always
+        env_file: /opt/redmine/.env
+        published_ports:
+          - "{{ redmine_port }}:3000"
+        volumes:
+          - redmine-files:/usr/src/redmine/files
+          - /opt/redmine/database.yml:/usr/src/redmine/config/database.yml
+      tags:
+        - deploy

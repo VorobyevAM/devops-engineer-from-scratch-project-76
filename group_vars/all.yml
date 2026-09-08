@@ -1,0 +1,38 @@
+---
+pip_package: python3-pip
+pip_executable: pip3
+pip_install_packages:
+  - name: docker
+    extra_args: --break-system-packages
+
+docker_users:
+  - "{{ ansible_user }}"
+
+# The Ubuntu docker.io unit uses socket activation. During migration to
+# Docker CE the old docker.socket can be stopped before the new service starts,
+# so bind the daemon to its Unix socket directly.
+docker_service_start_command: >-
+  /usr/bin/dockerd -H unix:///var/run/docker.sock
+  --containerd=/run/containerd/containerd.sock
+
+redmine_image: redmine:7.0.1
+redmine_port: 80
+
+redmine_db_host: rc1b-ame1lhro41i3u7sv.mdb.yandexcloud.net
+redmine_db_port: 6432
+redmine_db_name: hexlet6
+redmine_db_user: hexlet6
+
+datadog_site: datadoghq.eu
+datadog_config:
+  tags:
+    - env:production
+    - service:redmine
+datadog_checks:
+  http_check:
+    init_config:
+    instances:
+      - name: redmine
+        url: "http://127.0.0.1:{{ redmine_port }}/"
+        method: GET
+        timeout: 5
