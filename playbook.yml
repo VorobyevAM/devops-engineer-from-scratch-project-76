@@ -45,6 +45,7 @@
           Define vault_redmine_db_password and vault_redmine_secret_key_base
           in the encrypted group_vars/webservers/vault.yml file.
       no_log: true
+      when: "'webservers' in group_names"
       tags:
         - deploy
 
@@ -55,6 +56,7 @@
         owner: root
         group: root
         mode: "0750"
+      when: "'webservers' in group_names"
       tags:
         - deploy
 
@@ -66,6 +68,7 @@
         group: root
         mode: "0600"
       no_log: true
+      when: "'webservers' in group_names"
       tags:
         - deploy
 
@@ -76,6 +79,7 @@
         owner: "999"
         group: "999"
         mode: "0644"
+      when: "'webservers' in group_names"
       tags:
         - deploy
 
@@ -83,6 +87,7 @@
       community.docker.docker_container:
         name: hexlet6-smoke
         state: absent
+      when: "'webservers' in group_names"
       tags:
         - deploy
 
@@ -98,5 +103,6 @@
         volumes:
           - redmine-files:/usr/src/redmine/files
           - /opt/redmine/database.yml:/usr/src/redmine/config/database.yml
+      when: "'webservers' in group_names"
       tags:
         - deploy
