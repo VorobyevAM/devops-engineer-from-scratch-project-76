@@ -1,5 +1,0 @@
-.ansible/
-.git/
-.vault_password
-*.retry
-.DS_Store
