@@ -6,7 +6,7 @@ pip_install_packages:
     extra_args: --break-system-packages
 
 docker_users:
-  - "{{ ansible_user }}"
+  - "{{ ansible_user | default(ansible_facts.user_id) }}"
 
 redmine_image: redmine:7.0.1
 redmine_port: 80
